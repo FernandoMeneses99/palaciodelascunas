@@ -1,60 +1,35 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <title>Inicio</title>
-    <?php include './inc/link.php'; ?>
-    <link rel="shortcut icon" href="assets/favicon.svg" type="image/x-icon">
-</head>
-
-<body id="container-page-index">
-    <?php include './inc/navbar.php'; ?>
-    
-    <section id="new-prod-index">    
-         <div class="container">
-            <div class="page-header">
-                <h1>Últimos <small>productos agregados</small></h1>
-            </div>
-            <div class="row">
-              	<?php
-                  include 'library/configServer.php';
-                  include 'library/consulSQL.php';
-                  $consulta= ejecutarSQL::consultar("SELECT * FROM producto WHERE Stock > 0 AND Estado='Activo' ORDER BY id DESC LIMIT 7");
-                  $totalproductos = mysqli_num_rows($consulta);
-                  if($totalproductos>0){
-                      while($fila=mysqli_fetch_array($consulta, MYSQLI_ASSOC)){
-                ?>
-                <div class="col-xs-12 col-sm-6 col-md-4">
-                     <div class="thumbnail">
-                       <img class="img-product" src="assets/img-products/<?php if($fila['Imagen']!="" && is_file("./assets/img-products/".$fila['Imagen'])){ echo $fila['Imagen']; }else{ echo "default.png"; } ?>">
-                       <div class="caption">
-                       		<h3><?php echo $fila['Marca']; ?></h3>
-                            <p><?php echo $fila['NombreProd']; ?></p>
-                            <?php if($fila['Descuento']>0): ?>
-                             <p>
-                             <?php
-                             $pref=number_format($fila['Precio']-($fila['Precio']*($fila['Descuento']/100)), 2, '.', '');
-                             echo $fila['Descuento']."% descuento: $".$pref; 
-                             ?>
-                             </p>
-                             <?php else: ?>
-                              <p>$<?php echo $fila['Precio']; ?></p>
-                             <?php endif; ?>
-                        <p class="text-center">
-                            <a href="infoProd.php?CodigoProd=<?php echo $fila['CodigoProd']; ?>" class="btn btn-primary btn-sm btn-raised btn-block"><i class="fa fa-plus"></i>&nbsp; Detalles</a>
-                        </p>
-                       </div>
-                     </div>
-                </div>     
-                <?php
-                     }   
-                  }else{
-                      echo '<h2>No hay productos registrados en la tienda</h2>';
-                  }  
-              	?>  
-            </div>
-         </div>
-    </section>
-
-    <?php include './inc/footer.php'; ?>
-</body>
-</html>
+<?php
+require_once 'Config/Config.php';
+$ruta = !empty($_GET['url']) ? $_GET['url'] : "principal/index";
+$array = explode("/", $ruta);
+$controller = ucfirst($array[0]);
+$metodo = "index";
+$parametro = "";
+if (!empty($array[1])) {
+    if (!empty($array[1] != "")) {
+        $metodo = $array[1];
+    }
+}
+if (!empty($array[2])) {
+    if (!empty($array[2] != "")) {
+        for ($i = 2; $i < count($array); $i++) {
+            $parametro .= $array[$i] . ",";
+        }
+        $parametro = trim($parametro, ",");
+    }
+}
+require_once 'Config/App/Autoload.php';
+require_once 'Config/Helpers.php';
+$dirControllers = "Controllers/" . $controller . ".php";
+if (file_exists($dirControllers)) {
+    require_once $dirControllers;
+    $controller = new $controller();
+    if (method_exists($controller, $metodo)) {
+        $controller->$metodo($parametro);
+    } else {
+        header('Location: '.BASE_URL.'errors');
+    }
+} else {
+    header('Location: ' . BASE_URL . 'errors');
+}
+?>
