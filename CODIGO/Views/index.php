@@ -95,7 +95,7 @@
                             if ($count % 3 === 0) {
                                 echo '<div class="latest-prdouct__slider__item">';
                             }
-                            echo '<a href="detalles.php" class="latest-product__item">';
+                            echo '<a href="detalles" class="latest-product__item">';
                             echo '<div class="latest-product__item__pic">';
                             echo '<img src="' . BASE_URL . 'public/img/productos/' . $producto['imagen'] . '" alt="">';
                             echo '</div>';
